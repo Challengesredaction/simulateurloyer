@@ -173,7 +173,7 @@ label {
     <div class="field-group">
       <label for="ville-input">Ville</label>
       <div class="ac-wrap">
-        <input class="ac-input" id="ville-input" type="text" placeholder="Tapez une ville…" autocomplete="off">
+        <input class="ac-input" id="ville-input" type="text" placeholder="Recherchez une ville…" autocomplete="off">
         <div class="ac-drop" id="ville-drop"></div>
       </div>
     </div>
@@ -305,7 +305,7 @@ function pickVille(city) {
   populateQuartierDrop('');
   quartierInput.disabled = false;
   quartierInput.placeholder = city.quartiers.length
-    ? 'Tapez ou cliquez pour voir les quartiers…'
+    ? 'Ecrivez ou cliquez pour voir les quartiers…'
     : 'Pas de quartier disponible — moyenne ville uniquement';
   checkReady();
 }
@@ -499,7 +499,7 @@ function simulate() {
       </div>
       <div class="bar-ends"><span>${min.toFixed(1)} €/m²</span><span>${max.toFixed(1)} €/m²</span></div>
     </div>
-    <div class="source">Source : SeLoger / Meilleurs Agents – Loyers médians au m², charges non comprises. Données mars 2026.</div>
+    <div class="source">Source : SeLoger / Meilleurs Agents – Loyers au m², charges non comprises. Données au 1er mars 2026.</div>
   `;
   el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
