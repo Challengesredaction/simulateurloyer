@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulateur loyer – Challenges</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --challenges-red: #f43423;
+    --challenges-dark: #1a1a1a;
+    --challenges-mid: #444;
+    --challenges-light: #f5f3f0;
+    --challenges-border: #e0dbd5;
+    --green: #1a7a4a;
+    --orange: #d4580a;
+    --font-display: 'Lora', serif;
+    --font-body: 'Lora', serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--challenges-light);
+    color: var(--challenges-dark);
+    min-height: 100vh;
+  }
+
+  /* Main container */
+  .container {
+    max-width: 680px;
+    margin: 48px auto;
+    padding: 0 20px 60px;
+  }
+
+  /* Title block */
+  .title-block {
+    margin-bottom: 40px;
+  }
+  .kicker {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--challenges-red);
+    margin-bottom: 12px;
+  }
+  .main-title {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--challenges-red);
+    margin-bottom: 16px;
+  }
+  .subtitle {
+    font-size: 16px;
+    color: var(--challenges-mid);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  /* Form card */
+  .form-card {
+    background: white;
+    border: 1px solid var(--challenges-border);
+    border-radius: 4px;
+    padding: 36px;
+    margin-bottom: 24px;
+  }
+
+  .field-group {
+    margin-bottom: 28px;
+  }
+  .field-group:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--challenges-mid);
+    margin-bottom: 8px;
+  }
+
+  select, input[type="number"] {
+    width: 100%;
+    padding: 14px 16px;
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--challenges-dark);
+    background: var(--challenges-light);
+    border: 1.5px solid var(--challenges-border);
+    border-radius: 3px;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    outline: none;
+  }
+  select:focus, input[type="number"]:focus {
+    border-color: var(--challenges-dark);
+  }
+  input[type="number"]::placeholder { color: #bbb; font-weight: 300; }
+
+  .select-wrapper {
+    position: relative;
+  }
+  .select-wrapper::after {
+    content: '▾';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: var(--challenges-mid);
+    pointer-events: none;
+  }
+
+  .type-toggle {
+    display: flex;
+    gap: 0;
+    border: 1.5px solid var(--challenges-border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .type-toggle input[type="radio"] { display: none; }
+  .type-toggle label {
+    flex: 1;
+    text-align: center;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--challenges-mid);
+    cursor: pointer;
+    background: var(--challenges-light);
+    transition: all 0.15s;
+    margin: 0;
+    border: none;
+  }
+  .type-toggle input[type="radio"]:checked + label {
+    background: var(--challenges-red);
+    color: white;
+  }
+
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+  .input-unit {
+    position: relative;
+  }
+  .input-unit input { padding-right: 48px; }
+  .unit-label {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--challenges-mid);
+    pointer-events: none;
+  }
+
+  .btn-simulate {
+    width: 100%;
+    padding: 18px;
+    background: var(--challenges-red);
+    color: white;
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-top: 8px;
+  }
+  .btn-simulate:hover { background: #d42f1f; }
+  .btn-simulate:disabled { background: #ccc; cursor: not-allowed; }
+
+  /* Result card */
+  .result-card {
+    display: none;
+    background: white;
+    border: 1px solid var(--challenges-border);
+    border-radius: 4px;
+    overflow: hidden;
+    animation: fadeUp 0.3s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-banner {
+    padding: 28px 36px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .result-banner.above { background: #fff5f4; border-bottom: 3px solid var(--challenges-red); }
+  .result-banner.below { background: #f4fff8; border-bottom: 3px solid var(--green); }
+  .result-banner.equal { background: #fffbf4; border-bottom: 3px solid #d4a00a; }
+
+  .result-icon {
+    font-size: 40px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .result-verdict {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .result-verdict.above { color: var(--challenges-red); }
+  .result-verdict.below { color: var(--green); }
+  .result-verdict.equal { color: #d4a00a; }
+
+  .result-detail {
+    font-size: 14px;
+    color: var(--challenges-mid);
+    line-height: 1.5;
+  }
+
+  .result-stats {
+    padding: 28px 36px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    border-bottom: 1px solid var(--challenges-border);
+  }
+  .stat-item { text-align: center; }
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--challenges-dark);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--challenges-mid);
+  }
+  .stat-item.highlight .stat-value { color: var(--challenges-red); }
+
+  /* Bar visual */
+  .result-bar-section {
+    padding: 24px 36px 32px;
+  }
+  .bar-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--challenges-mid);
+    margin-bottom: 16px;
+  }
+  .bar-container { position: relative; height: 36px; }
+  .bar-track {
+    height: 8px;
+    background: var(--challenges-border);
+    border-radius: 4px;
+    position: absolute;
+    left: 0; right: 0; top: 50%;
+    transform: translateY(-50%);
+  }
+  .bar-fill {
+    height: 8px;
+    border-radius: 4px;
+    position: absolute;
+    left: 0; top: 50%;
+    transform: translateY(-50%);
+    transition: width 0.6s ease;
+  }
+  .bar-fill.above { background: var(--challenges-red); }
+  .bar-fill.below { background: var(--green); }
+  .bar-fill.equal { background: #d4a00a; }
+
+  .bar-marker {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    text-align: center;
+    pointer-events: none;
+  }
+  .bar-marker-line {
+    width: 2px;
+    height: 36px;
+    background: var(--challenges-dark);
+    margin: 0 auto;
+    opacity: 0.4;
+  }
+  .bar-marker-label {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--challenges-mid);
+    white-space: nowrap;
+  }
+
+  .bar-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--challenges-mid);
+    font-weight: 500;
+  }
+
+  /* Autocomplete */
+  .autocomplete-wrapper { position: relative; }
+  #input-quartier-search {
+    width: 100%;
+    padding: 14px 16px;
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--challenges-dark);
+    background: var(--challenges-light);
+    border: 1.5px solid var(--challenges-border);
+    border-radius: 3px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  #input-quartier-search:focus { border-color: var(--challenges-dark); }
+  #input-quartier-search:disabled { opacity: 0.5; cursor: not-allowed; }
+  #input-quartier-search::placeholder { color: #bbb; font-weight: 300; }
+
+  .autocomplete-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: white;
+    border: 1.5px solid var(--challenges-dark);
+    border-radius: 3px;
+    max-height: 260px;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  }
+  .autocomplete-dropdown.open { display: block; }
+
+  .ac-group-header {
+    padding: 8px 14px 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--challenges-red);
+    background: white;
+    position: sticky;
+    top: 0;
+    border-bottom: 1px solid var(--challenges-border);
+  }
+  .ac-item {
+    padding: 10px 14px 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    color: var(--challenges-dark);
+    transition: background 0.1s;
+  }
+  .ac-item:hover, .ac-item.highlighted { background: var(--challenges-light); }
+  .ac-item.selected { background: #fff5f4; font-weight: 500; }
+  .ac-item mark { background: none; color: var(--challenges-red); font-weight: 600; }
+
+  /* Source note */
+  .source-note {
+    margin-top: 16px;
+    font-size: 11px;
+    color: #999;
+    text-align: center;
+    padding: 0 36px;
+    padding-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .no-data-msg {
+    padding: 24px 36px;
+    color: var(--challenges-mid);
+    font-size: 14px;
+    font-style: italic;
+  }
+
+  @media (max-width: 520px) {
+    .form-card { padding: 24px 20px; }
+    .row-2 { grid-template-columns: 1fr; }
+    .result-stats { grid-template-columns: 1fr 1fr; }
+    .result-banner { padding: 20px; }
+    .result-bar-section { padding: 16px 20px 24px; }
+    .result-stats { padding: 20px; }
+    .source-note { padding: 0 20px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="title-block">
+    <h1 class="main-title">Payez-vous votre loyer trop cher ?</h1>
+    <p class="subtitle">Renseignez votre ville, votre quartier et vos conditions de location pour savoir si votre loyer est dans la moyenne du marché.</p>
+  </div>
+
+  <div class="form-card">
+
+    <div class="field-group">
+      <label>Type de bien</label>
+      <div class="type-toggle">
+        <input type="radio" name="type-bien" id="type-appart" value="appart" checked>
+        <label for="type-appart">Appartement</label>
+        <input type="radio" name="type-bien" id="type-maison" value="maison">
+        <label for="type-maison">Maison</label>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label for="select-ville">Ville</label>
+      <div class="select-wrapper">
+        <select id="select-ville">
+          <option value="">— Sélectionnez une ville —</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label for="input-quartier-search">Quartier</label>
+      <div class="autocomplete-wrapper">
+        <input type="text" id="input-quartier-search" placeholder="— Sélectionnez d'abord une ville —" disabled autocomplete="off">
+        <div class="autocomplete-dropdown" id="autocomplete-dropdown"></div>
+      </div>
+      <input type="hidden" id="select-quartier" value="">
+    </div>
+
+    <div class="row-2">
+      <div class="field-group">
+        <label for="input-loyer">Loyer mensuel</label>
+        <div class="input-unit">
+          <input type="number" id="input-loyer" placeholder="ex. 950" min="1" max="20000">
+          <span class="unit-label">€</span>
+        </div>
+      </div>
+      <div class="field-group">
+        <label for="input-surface">Surface</label>
+        <div class="input-unit">
+          <input type="number" id="input-surface" placeholder="ex. 45" min="1" max="1000">
+          <span class="unit-label">m²</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-simulate" id="btn-simulate" onclick="simulate()" disabled>Calculer</button>
+  </div>
+
+  <div class="result-card" id="result-card">
+    <!-- filled by JS -->
+  </div>
+
+</div>
+
+<script>
+const DATA = [{"ville":"Nice","cp":6000,"avg_appart":20.25,"avg_maison":20.24,"quartiers":[{"nom":"Mont Boron","cp":6000,"loyer_appart":21.11,"loyer_maison":null},{"nom":"Rue de France","cp":6000,"loyer_appart":22.3,"loyer_maison":null},{"nom":"Medecin","cp":6000,"loyer_appart":22.22,"loyer_maison":null},{"nom":"Vieille Ville","cp":6000,"loyer_appart":21.65,"loyer_maison":null},{"nom":"Gairaut","cp":6000,"loyer_appart":19.97,"loyer_maison":null},{"nom":"Le Port","cp":6000,"loyer_appart":20.35,"loyer_maison":null},{"nom":"Vinaigrier","cp":6000,"loyer_appart":18.7,"loyer_maison":18.73},{"nom":"Baumettes","cp":6000,"loyer_appart":20.87,"loyer_maison":null},{"nom":"Thiers","cp":6000,"loyer_appart":21.36,"loyer_maison":null},{"nom":"Sainte Marguerite","cp":6000,"loyer_appart":20.78,"loyer_maison":null},{"nom":"Carabacel","cp":6000,"loyer_appart":21.45,"loyer_maison":null},{"nom":"Saint Antoine","cp":6000,"loyer_appart":21.57,"loyer_maison":20.76},{"nom":"Cimiez","cp":6000,"loyer_appart":21.58,"loyer_maison":20.16},{"nom":"Gambetta","cp":6000,"loyer_appart":21.08,"loyer_maison":null},{"nom":"Fabron","cp":6000,"loyer_appart":21.14,"loyer_maison":20.45},{"nom":"Rimiez","cp":6000,"loyer_appart":20.81,"loyer_maison":null},{"nom":"Pessicart / Saint Pancrace","cp":6000,"loyer_appart":20.08,"loyer_maison":20.8},{"nom":"Caucade","cp":6000,"loyer_appart":20.28,"loyer_maison":null},{"nom":"Saint Philippe","cp":6000,"loyer_appart":19.74,"loyer_maison":20.46},{"nom":"Saint Isidore / Lingostiere","cp":6000,"loyer_appart":20.81,"loyer_maison":18.99},{"nom":"Saint Pierre de Feric","cp":6000,"loyer_appart":20.07,"loyer_maison":20.1},{"nom":"Cremat / Saint Roman","cp":6000,"loyer_appart":20.59,"loyer_maison":20.59},{"nom":"Liberation","cp":6000,"loyer_appart":19.87,"loyer_maison":null},{"nom":"Saint Maurice","cp":6000,"loyer_appart":19.47,"loyer_maison":19.93},{"nom":"Riquier","cp":6000,"loyer_appart":20.02,"loyer_maison":null},{"nom":"Mantega","cp":6000,"loyer_appart":19.89,"loyer_maison":20.41},{"nom":"Le Piol","cp":6000,"loyer_appart":19.94,"loyer_maison":null},{"nom":"Le Ray","cp":6000,"loyer_appart":18.92,"loyer_maison":19.29},{"nom":"Madeleine","cp":6000,"loyer_appart":19.74,"loyer_maison":18.97},{"nom":"Vernier","cp":6000,"loyer_appart":19.28,"loyer_maison":null},{"nom":"Saint Sylvestre","cp":6000,"loyer_appart":19.69,"loyer_maison":19.98},{"nom":"Saint Roch","cp":6000,"loyer_appart":19.21,"loyer_maison":null},{"nom":"Ventabrun","cp":6000,"loyer_appart":18.28,"loyer_maison":19.0},{"nom":"Saint Augustin","cp":6000,"loyer_appart":19.49,"loyer_maison":null},{"nom":"Arenas","cp":6000,"loyer_appart":18.72,"loyer_maison":null},{"nom":"Pasteur","cp":6000,"loyer_appart":18.13,"loyer_maison":18.7},{"nom":"Roquebilliere","cp":6000,"loyer_appart":18.39,"loyer_maison":18.69},{"nom":"Ariane","cp":6000,"loyer_appart":18.54,"loyer_maison":18.69}]},{"ville":"Marseille","cp":13000,"avg_appart":16.42,"avg_maison":17.14,"quartiers":[{"nom":"Opera","cp":13001,"loyer_appart":17.9,"loyer_maison":null},{"nom":"Thiers","cp":13001,"loyer_appart":16.14,"loyer_maison":null},{"nom":"Saint Charles","cp":13001,"loyer_appart":15.9,"loyer_maison":null},{"nom":"Noailles","cp":13001,"loyer_appart":15.95,"loyer_maison":null},{"nom":"Chapitre","cp":13001,"loyer_appart":15.94,"loyer_maison":null},{"nom":"Belsunce","cp":13001,"loyer_appart":15.06,"loyer_maison":null},{"nom":"Hotel de Ville","cp":13002,"loyer_appart":16.88,"loyer_maison":16.2},{"nom":"Grands Carmes","cp":13002,"loyer_appart":16.03,"loyer_maison":null},{"nom":"Arenc","cp":13002,"loyer_appart":15.63,"loyer_maison":14.53},{"nom":"La Joliette","cp":13002,"loyer_appart":16.87,"loyer_maison":null},{"nom":"La Vilette","cp":13003,"loyer_appart":16.04,"loyer_maison":14.42},{"nom":"Belle de Mai","cp":13003,"loyer_appart":15.35,"loyer_maison":14.44},{"nom":"Saint Lazare","cp":13003,"loyer_appart":15.45,"loyer_maison":14.31},{"nom":"Saint Mauron","cp":13003,"loyer_appart":15.57,"loyer_maison":14.31},{"nom":"Cinq Avenues","cp":13004,"loyer_appart":15.81,"loyer_maison":15.93},{"nom":"La Blancarde","cp":13004,"loyer_appart":15.84,"loyer_maison":15.5},{"nom":"Les Chartreux","cp":13004,"loyer_appart":15.12,"loyer_maison":15.1},{"nom":"Chutes Lavie","cp":13004,"loyer_appart":15.37,"loyer_maison":15.05},{"nom":"Le Camas","cp":13005,"loyer_appart":16.37,"loyer_maison":14.4},{"nom":"Baille","cp":13005,"loyer_appart":16.55,"loyer_maison":null},{"nom":"La Conception","cp":13005,"loyer_appart":16.5,"loyer_maison":null},{"nom":"Saint Pierre","cp":13005,"loyer_appart":16.16,"loyer_maison":15.33},{"nom":"Vauban","cp":13006,"loyer_appart":17.8,"loyer_maison":17.57},{"nom":"Palais de Justice","cp":13006,"loyer_appart":17.47,"loyer_maison":20.18},{"nom":"Castellane","cp":13006,"loyer_appart":17.09,"loyer_maison":14.4},{"nom":"Prefecture","cp":13006,"loyer_appart":16.59,"loyer_maison":null},{"nom":"Lodi","cp":13006,"loyer_appart":16.81,"loyer_maison":14.24},{"nom":"Notre Dame du Mont","cp":13006,"loyer_appart":16.69,"loyer_maison":null},{"nom":"Roucas Blanc","cp":13007,"loyer_appart":18.18,"loyer_maison":20.09},{"nom":"Endoume","cp":13007,"loyer_appart":17.94,"loyer_maison":20.31},{"nom":"Bompard","cp":13007,"loyer_appart":18.2,"loyer_maison":20.25},{"nom":"Les Iles","cp":13007,"loyer_appart":null,"loyer_maison":null},{"nom":"Saint Lambert","cp":13007,"loyer_appart":17.81,"loyer_maison":17.9},{"nom":"Saint Victor","cp":13007,"loyer_appart":18.12,"loyer_maison":17.35},{"nom":"Le Pharo","cp":13007,"loyer_appart":18.16,"loyer_maison":16.18},{"nom":"Montredon","cp":13008,"loyer_appart":18.68,"loyer_maison":19.49},{"nom":"La Plage","cp":13008,"loyer_appart":18.45,"loyer_maison":20.79},{"nom":"Les Goudes","cp":13008,"loyer_appart":null,"loyer_maison":null},{"nom":"Pointe Rouge","cp":13008,"loyer_appart":18.48,"loyer_maison":20.25},{"nom":"Vielle Chapelle","cp":13008,"loyer_appart":18.54,"loyer_maison":19.67},{"nom":"Bonneveine","cp":13008,"loyer_appart":18.2,"loyer_maison":19.89},{"nom":"Perier","cp":13008,"loyer_appart":18.75,"loyer_maison":20.19},{"nom":"Sainte Anne","cp":13008,"loyer_appart":18.04,"loyer_maison":19.79},{"nom":"Saint Giniez","cp":13008,"loyer_appart":18.32,"loyer_maison":19.97},{"nom":"Le Rouet","cp":13008,"loyer_appart":17.76,"loyer_maison":15.57},{"nom":"Sormiou","cp":13009,"loyer_appart":17.7,"loyer_maison":17.05},{"nom":"Les Baumettes","cp":13009,"loyer_appart":17.83,"loyer_maison":17.67},{"nom":"Vaufreges","cp":13009,"loyer_appart":null,"loyer_maison":null},{"nom":"Mazargues","cp":13009,"loyer_appart":17.56,"loyer_maison":18.06},{"nom":"Le Redon","cp":13009,"loyer_appart":17.77,"loyer_maison":17.77},{"nom":"Le Cabot","cp":13009,"loyer_appart":17.62,"loyer_maison":18.17},{"nom":"Sainte Marguerite","cp":13009,"loyer_appart":16.48,"loyer_maison":16.69},{"nom":"La Panouse","cp":13009,"loyer_appart":17.76,"loyer_maison":17.49},{"nom":"La Timone","cp":13010,"loyer_appart":15.92,"loyer_maison":null},{"nom":"Menpenti","cp":13010,"loyer_appart":16.33,"loyer_maison":null},{"nom":"Saint Loup","cp":13010,"loyer_appart":16.04,"loyer_maison":16.19},{"nom":"Pont de Vivaux","cp":13010,"loyer_appart":15.71,"loyer_maison":15.8},{"nom":"Saint Tronc","cp":13010,"loyer_appart":16.09,"loyer_maison":15.69},{"nom":"La Capelette","cp":13010,"loyer_appart":15.64,"loyer_maison":null},{"nom":"Eoures","cp":13011,"loyer_appart":17.52,"loyer_maison":17.19},{"nom":"Les Accates","cp":13011,"loyer_appart":17.23,"loyer_maison":16.82},{"nom":"La Treille","cp":13011,"loyer_appart":null,"loyer_maison":null},{"nom":"Les Camoins","cp":13011,"loyer_appart":17.32,"loyer_maison":17.77},{"nom":"La Valentine","cp":13011,"loyer_appart":17.33,"loyer_maison":17.46},{"nom":"Saint Menet","cp":13011,"loyer_appart":17.29,"loyer_maison":17.41},{"nom":"La Barasse","cp":13011,"loyer_appart":17.19,"loyer_maison":17.38},{"nom":"La Milliere","cp":13011,"loyer_appart":16.14,"loyer_maison":17.69},{"nom":"Saint Marcel","cp":13011,"loyer_appart":16.19,"loyer_maison":17.13},{"nom":"La Pomme","cp":13011,"loyer_appart":16.27,"loyer_maison":15.27},{"nom":"La Valbarelle","cp":13011,"loyer_appart":15.48,"loyer_maison":15.55},{"nom":"Saint Barnabe","cp":13012,"loyer_appart":16.8,"loyer_maison":19.01},{"nom":"Les Trois Lucs","cp":13012,"loyer_appart":17.42,"loyer_maison":18.35},{"nom":"Saint Julien","cp":13012,"loyer_appart":17.24,"loyer_maison":19.49},{"nom":"Montolivet","cp":13012,"loyer_appart":16.91,"loyer_maison":18.43},{"nom":"Les Caillols","cp":13012,"loyer_appart":16.84,"loyer_maison":19.44},{"nom":"La Fourragere","cp":13012,"loyer_appart":17.13,"loyer_maison":19.57},{"nom":"Saint Jean du Desert","cp":13012,"loyer_appart":16.52,"loyer_maison":20.15},{"nom":"Les Medecins","cp":13013,"loyer_appart":17.29,"loyer_maison":16.8},{"nom":"Les Mourets","cp":13013,"loyer_appart":16.79,"loyer_maison":14.07},{"nom":"Palama","cp":13013,"loyer_appart":16.86,"loyer_maison":15.29},{"nom":"Chateau-Gombert","cp":13013,"loyer_appart":17.0,"loyer_maison":15.51},{"nom":"Saint Mitre","cp":13013,"loyer_appart":16.39,"loyer_maison":15.62},{"nom":"Les Olives","cp":13013,"loyer_appart":16.48,"loyer_maison":17.07},{"nom":"La Croix Rouge","cp":13013,"loyer_appart":16.65,"loyer_maison":15.48},{"nom":"Saint Jerome","cp":13013,"loyer_appart":15.67,"loyer_maison":16.01},{"nom":"Saint Just","cp":13013,"loyer_appart":14.74,"loyer_maison":16.11},{"nom":"La Rose","cp":13013,"loyer_appart":15.55,"loyer_maison":15.8},{"nom":"Malpasse","cp":13013,"loyer_appart":14.83,"loyer_maison":15.6},{"nom":"Sainte Marthe","cp":13014,"loyer_appart":16.41,"loyer_maison":15.43},{"nom":"Le Merlan","cp":13014,"loyer_appart":14.93,"loyer_maison":14.72},{"nom":"Saint Joseph","cp":13014,"loyer_appart":16.64,"loyer_maison":14.72},{"nom":"Les Arnavaux","cp":13014,"loyer_appart":14.93,"loyer_maison":14.67},{"nom":"Saint Barthelemy","cp":13014,"loyer_appart":14.58,"loyer_maison":14.6},{"nom":"Bon Secours","cp":13014,"loyer_appart":15.3,"loyer_maison":14.95},{"nom":"Le Canet","cp":13014,"loyer_appart":15.56,"loyer_maison":14.55},{"nom":"Verduron","cp":13015,"loyer_appart":14.58,"loyer_maison":16.3},{"nom":"Saint Antoine","cp":13015,"loyer_appart":14.43,"loyer_maison":14.65},{"nom":"La Delorme","cp":13015,"loyer_appart":14.43,"loyer_maison":15.15},{"nom":"La Viste","cp":13015,"loyer_appart":14.3,"loyer_maison":14.61},{"nom":"Notre Dame Limite","cp":13015,"loyer_appart":14.5,"loyer_maison":14.58},{"nom":"Les Borels","cp":13015,"loyer_appart":14.25,"loyer_maison":14.78},{"nom":"Les Aygalades","cp":13015,"loyer_appart":14.26,"loyer_maison":15.3},{"nom":"Saint Louis","cp":13015,"loyer_appart":14.4,"loyer_maison":15.09},{"nom":"La Cabucelle","cp":13015,"loyer_appart":15.41,"loyer_maison":14.52},{"nom":"Les Crottes","cp":13015,"loyer_appart":16.37,"loyer_maison":14.31},{"nom":"La Calade","cp":13015,"loyer_appart":15.57,"loyer_maison":14.59},{"nom":"L'Estaque","cp":13016,"loyer_appart":15.98,"loyer_maison":15.73},{"nom":"Les Riaux","cp":13016,"loyer_appart":null,"loyer_maison":null},{"nom":"Saint Henri","cp":13016,"loyer_appart":15.55,"loyer_maison":14.67},{"nom":"Saint Andre","cp":13016,"loyer_appart":15.14,"loyer_maison":14.66}]},{"ville":"Toulouse","cp":31000,"avg_appart":15.17,"avg_maison":12.73,"quartiers":[{"nom":"Saint-Etienne","cp":31000,"loyer_appart":17.84,"loyer_maison":13.34},{"nom":"Saint-Georges","cp":31000,"loyer_appart":18.11,"loyer_maison":14.26},{"nom":"Carmes","cp":31000,"loyer_appart":17.84,"loyer_maison":13.23},{"nom":"Capitole","cp":31000,"loyer_appart":17.58,"loyer_maison":13.33},{"nom":"Saint-Aubin / Dupuy","cp":31000,"loyer_appart":16.92,"loyer_maison":13.22},{"nom":"Le Busca","cp":31000,"loyer_appart":16.86,"loyer_maison":13.43},{"nom":"Les Chalets","cp":31000,"loyer_appart":16.87,"loyer_maison":12.88},{"nom":"Arnaud Bernard","cp":31000,"loyer_appart":17.08,"loyer_maison":13.22},{"nom":"Saint-Cyprien","cp":31000,"loyer_appart":16.88,"loyer_maison":13.24},{"nom":"Matabiau","cp":31000,"loyer_appart":16.36,"loyer_maison":13.36},{"nom":"Compans","cp":31000,"loyer_appart":16.26,"loyer_maison":12.89},{"nom":"Saint-Michel","cp":31000,"loyer_appart":15.72,"loyer_maison":13.38},{"nom":"Cote Pavee","cp":31000,"loyer_appart":15.28,"loyer_maison":13.4},{"nom":"Patte d'Oie","cp":31000,"loyer_appart":15.48,"loyer_maison":12.69},{"nom":"Amidonniers","cp":31000,"loyer_appart":15.83,"loyer_maison":13.2},{"nom":"Guilhemery","cp":31000,"loyer_appart":15.2,"loyer_maison":13.51},{"nom":"Marengo / Jolimont","cp":31000,"loyer_appart":14.9,"loyer_maison":13.02},{"nom":"Saint-Agne","cp":31000,"loyer_appart":15.22,"loyer_maison":13.03},{"nom":"Fer-à-Cheval","cp":31000,"loyer_appart":15.71,"loyer_maison":12.83},{"nom":"Pont-des-Demoiselles","cp":31000,"loyer_appart":14.72,"loyer_maison":13.11},{"nom":"Minimes","cp":31000,"loyer_appart":15.19,"loyer_maison":12.65},{"nom":"Sept Deniers","cp":31000,"loyer_appart":14.79,"loyer_maison":12.55},{"nom":"Jules Julien","cp":31000,"loyer_appart":14.85,"loyer_maison":12.83},{"nom":"La Terrasse","cp":31000,"loyer_appart":14.05,"loyer_maison":12.66},{"nom":"Bonnefoy","cp":31000,"loyer_appart":14.66,"loyer_maison":12.9},{"nom":"Sauzelong / Rangueil","cp":31000,"loyer_appart":14.8,"loyer_maison":13.17},{"nom":"Rangueil / CHR / Facultes","cp":31000,"loyer_appart":14.62,"loyer_maison":12.75},{"nom":"Chateau-de-l'Hers","cp":31000,"loyer_appart":14.31,"loyer_maison":13.15},{"nom":"Pouvourville","cp":31000,"loyer_appart":14.57,"loyer_maison":12.69},{"nom":"Casselardit","cp":31000,"loyer_appart":14.61,"loyer_maison":12.67},{"nom":"Arenes","cp":31000,"loyer_appart":15.19,"loyer_maison":12.67},{"nom":"Barriere-de-Paris","cp":31000,"loyer_appart":14.29,"loyer_maison":12.85},{"nom":"Montaudran / Lespinet","cp":31000,"loyer_appart":14.05,"loyer_maison":13.0},{"nom":"Juncasse / Argoulets","cp":31000,"loyer_appart":14.34,"loyer_maison":13.1},{"nom":"Empalot","cp":31000,"loyer_appart":14.85,"loyer_maison":12.65},{"nom":"Lardenne","cp":31000,"loyer_appart":14.48,"loyer_maison":12.28},{"nom":"Roseraie","cp":31000,"loyer_appart":14.04,"loyer_maison":12.97},{"nom":"Croix-de-Pierre","cp":31000,"loyer_appart":14.74,"loyer_maison":12.22},{"nom":"Croix-Daurade","cp":31000,"loyer_appart":13.62,"loyer_maison":12.57},{"nom":"Fontaine-Lestang","cp":31000,"loyer_appart":15.26,"loyer_maison":12.31},{"nom":"Soupetard","cp":31000,"loyer_appart":14.19,"loyer_maison":13.38},{"nom":"Saint-Martin-du-Touch","cp":31000,"loyer_appart":14.17,"loyer_maison":12.74},{"nom":"Basso-Cambo","cp":31000,"loyer_appart":14.11,"loyer_maison":11.89},{"nom":"Purpan","cp":31000,"loyer_appart":14.12,"loyer_maison":12.51},{"nom":"Ramier","cp":31000,"loyer_appart":null,"loyer_maison":null},{"nom":"Saint-Simon","cp":31000,"loyer_appart":13.76,"loyer_maison":12.15},{"nom":"Lalande","cp":31000,"loyer_appart":13.55,"loyer_maison":12.39},{"nom":"La Cepiere","cp":31000,"loyer_appart":14.46,"loyer_maison":12.31},{"nom":"Les Pradettes","cp":31000,"loyer_appart":14.25,"loyer_maison":12.32},{"nom":"Les Izards","cp":31000,"loyer_appart":13.72,"loyer_maison":12.03},{"nom":"Mirail / Universite","cp":31000,"loyer_appart":14.21,"loyer_maison":12.17},{"nom":"Faourette","cp":31000,"loyer_appart":14.17,"loyer_maison":12.67},{"nom":"La Fourguette","cp":31000,"loyer_appart":13.73,"loyer_maison":12.02},{"nom":"Papus","cp":31000,"loyer_appart":13.62,"loyer_maison":12.14},{"nom":"Bagatelle","cp":31000,"loyer_appart":14.28,"loyer_maison":12.66},{"nom":"Bellefontaine","cp":31000,"loyer_appart":13.62,"loyer_maison":12.85},{"nom":"Reynerie","cp":31000,"loyer_appart":13.94,"loyer_maison":12.67}]},{"ville":"Bordeaux","cp":33000,"avg_appart":17.08,"avg_maison":15.7,"quartiers":[{"nom":"Hotel de Ville / Quinconces","cp":33000,"loyer_appart":18.13,"loyer_maison":16.55},{"nom":"Saint-Seurin / Fondaudege","cp":33000,"loyer_appart":18.12,"loyer_maison":15.72},{"nom":"Chartrons / Grand-Parc","cp":33000,"loyer_appart":17.36,"loyer_maison":15.34},{"nom":"Saint-Bruno / Saint-Victor","cp":33000,"loyer_appart":17.26,"loyer_maison":17.08},{"nom":"Capucins / Victoire","cp":33000,"loyer_appart":17.16,"loyer_maison":16.55},{"nom":"Villa Primerose / Parc Bordelais / Cauderan","cp":33000,"loyer_appart":16.67,"loyer_maison":15.56},{"nom":"Saint-Augustin","cp":33000,"loyer_appart":16.62,"loyer_maison":15.87},{"nom":"Nansouty","cp":33000,"loyer_appart":16.97,"loyer_maison":16.3},{"nom":"La Bastide","cp":33000,"loyer_appart":15.84,"loyer_maison":15.13},{"nom":"Gare Saint-Jean","cp":33000,"loyer_appart":15.97,"loyer_maison":16.13},{"nom":"Lestonat / Monsejour","cp":33000,"loyer_appart":15.8,"loyer_maison":14.82},{"nom":"Bacalan","cp":33000,"loyer_appart":15.74,"loyer_maison":14.47}]},{"ville":"Montpellier","cp":34000,"avg_appart":15.98,"avg_maison":14.03,"quartiers":[{"nom":"Port Marianne","cp":34000,"loyer_appart":16.46,"loyer_maison":15.76},{"nom":"Aiguelongue","cp":34000,"loyer_appart":16.19,"loyer_maison":13.3},{"nom":"Les Beaux Arts","cp":34000,"loyer_appart":16.49,"loyer_maison":15.35},{"nom":"Les Arceaux","cp":34000,"loyer_appart":16.0,"loyer_maison":15.92},{"nom":"Centre Historique","cp":34000,"loyer_appart":16.39,"loyer_maison":15.35},{"nom":"La Comédie","cp":34000,"loyer_appart":16.63,"loyer_maison":16.32},{"nom":"Millénaire / Grammont","cp":34000,"loyer_appart":16.46,"loyer_maison":14.04},{"nom":"Boutonnet","cp":34000,"loyer_appart":16.32,"loyer_maison":15.38},{"nom":"Antigone","cp":34000,"loyer_appart":16.23,"loyer_maison":14.56},{"nom":"La Pompignane","cp":34000,"loyer_appart":16.18,"loyer_maison":14.09},{"nom":"Plan des Quatre Seigneurs","cp":34000,"loyer_appart":16.3,"loyer_maison":13.54},{"nom":"Aiguerelles","cp":34000,"loyer_appart":16.36,"loyer_maison":14.89},{"nom":"Gares","cp":34000,"loyer_appart":16.38,"loyer_maison":14.33},{"nom":"Les Aubes","cp":34000,"loyer_appart":16.35,"loyer_maison":13.26},{"nom":"Gambetta","cp":34000,"loyer_appart":16.08,"loyer_maison":16.79},{"nom":"Hôpitaux / Facultés","cp":34000,"loyer_appart":16.04,"loyer_maison":14.05},{"nom":"La Croix d'Argent","cp":34000,"loyer_appart":15.48,"loyer_maison":12.87},{"nom":"Pas du Loup","cp":34000,"loyer_appart":15.67,"loyer_maison":13.38},{"nom":"Estanove","cp":34000,"loyer_appart":15.74,"loyer_maison":13.73},{"nom":"Les Cévennes","cp":34000,"loyer_appart":15.75,"loyer_maison":14.06},{"nom":"Figuerolles","cp":34000,"loyer_appart":15.68,"loyer_maison":14.65},{"nom":"La Martelle","cp":34000,"loyer_appart":15.67,"loyer_maison":13.84},{"nom":"Saint Martin","cp":34000,"loyer_appart":15.52,"loyer_maison":14.4},{"nom":"La Chamberte","cp":34000,"loyer_appart":15.5,"loyer_maison":13.57},{"nom":"Lemasson","cp":34000,"loyer_appart":15.33,"loyer_maison":12.95},{"nom":"Alco","cp":34000,"loyer_appart":15.26,"loyer_maison":13.39},{"nom":"Celleneuve","cp":34000,"loyer_appart":15.29,"loyer_maison":13.56},{"nom":"Les Hauts de Massane","cp":34000,"loyer_appart":16.04,"loyer_maison":13.41},{"nom":"La Paillade","cp":34000,"loyer_appart":15.54,"loyer_maison":13.1}]},{"ville":"Rennes","cp":35000,"avg_appart":15.06,"avg_maison":15.16,"quartiers":[{"nom":"Centre","cp":35000,"loyer_appart":16.02,"loyer_maison":18.15},{"nom":"Thabor / Saint Helier","cp":35000,"loyer_appart":15.77,"loyer_maison":18.25},{"nom":"Cleunay / Arsenal / Redon","cp":35000,"loyer_appart":15.38,"loyer_maison":14.67},{"nom":"Nord / Saint Martin","cp":35000,"loyer_appart":13.35,"loyer_maison":18.44},{"nom":"Moulin du Comte","cp":35000,"loyer_appart":15.73,"loyer_maison":14.05},{"nom":"Sud / Gare","cp":35000,"loyer_appart":15.62,"loyer_maison":15.55},{"nom":"Beaulieu / Baud","cp":35000,"loyer_appart":14.36,"loyer_maison":17.06},{"nom":"Francisco Ferrer / Vern / Poterie","cp":35000,"loyer_appart":15.21,"loyer_maison":13.91},{"nom":"Maurepas / Patton / Les Gayeulles","cp":35000,"loyer_appart":14.03,"loyer_maison":13.88},{"nom":"Villejean / Beauregard","cp":35000,"loyer_appart":13.34,"loyer_maison":13.37},{"nom":"Brequigny","cp":35000,"loyer_appart":14.61,"loyer_maison":13.09},{"nom":"Le Blosne","cp":35000,"loyer_appart":14.76,"loyer_maison":13.3}]},{"ville":"Nantes","cp":44000,"avg_appart":14.71,"avg_maison":13.83,"quartiers":[{"nom":"Hauts Pavés / Saint Félix","cp":44000,"loyer_appart":15.16,"loyer_maison":14.99},{"nom":"Centre Ville","cp":44000,"loyer_appart":16.13,"loyer_maison":15.65},{"nom":"Breil / Barberie","cp":44000,"loyer_appart":14.14,"loyer_maison":14.63},{"nom":"Dervallières / Zola","cp":44000,"loyer_appart":14.9,"loyer_maison":14.53},{"nom":"Saint Donatien / Malakoff","cp":44000,"loyer_appart":14.76,"loyer_maison":14.33},{"nom":"Ile de Nantes","cp":44000,"loyer_appart":14.82,"loyer_maison":13.48},{"nom":"Chantenay / Bellevue / Sainte Anne","cp":44000,"loyer_appart":14.68,"loyer_maison":14.34},{"nom":"Nantes Erdre","cp":44000,"loyer_appart":13.64,"loyer_maison":13.54},{"nom":"Quartiers Nord","cp":44000,"loyer_appart":13.52,"loyer_maison":12.64},{"nom":"Quartiers Sud","cp":44000,"loyer_appart":13.93,"loyer_maison":12.04},{"nom":"Doulon / Bottière","cp":44000,"loyer_appart":13.83,"loyer_maison":12.39}]},{"ville":"Lille","cp":59000,"avg_appart":16.31,"avg_maison":11.82,"quartiers":[{"nom":"Vieux Lille","cp":59000,"loyer_appart":17.76,"loyer_maison":12.81},{"nom":"Lille Centre","cp":59000,"loyer_appart":17.34,"loyer_maison":13.49},{"nom":"Vauban / Esquermes","cp":59000,"loyer_appart":16.42,"loyer_maison":13.82},{"nom":"Wazemmes","cp":59000,"loyer_appart":16.46,"loyer_maison":13.54},{"nom":"Saint Maurice / Pellevoisin","cp":59000,"loyer_appart":16.22,"loyer_maison":12.18},{"nom":"Bois Blancs","cp":59000,"loyer_appart":15.54,"loyer_maison":11.21},{"nom":"Moulins","cp":59000,"loyer_appart":16.08,"loyer_maison":12.58},{"nom":"Grand Quartier 01","cp":59000,"loyer_appart":15.16,"loyer_maison":10.04},{"nom":"Grand Quartier 03","cp":59000,"loyer_appart":15.22,"loyer_maison":10.18},{"nom":"Les Sarts","cp":59000,"loyer_appart":14.48,"loyer_maison":12.17},{"nom":"Sud Marais","cp":59000,"loyer_appart":15.16,"loyer_maison":9.9},{"nom":"Mitterie","cp":59000,"loyer_appart":15.13,"loyer_maison":10.09},{"nom":"Lille Fives","cp":59000,"loyer_appart":14.54,"loyer_maison":11.95},{"nom":"Centre","cp":59000,"loyer_appart":14.63,"loyer_maison":12.31},{"nom":"Lille Sud","cp":59000,"loyer_appart":14.74,"loyer_maison":11.64},{"nom":"Epine Mont de Terre","cp":59000,"loyer_appart":14.43,"loyer_maison":12.16},{"nom":"Faubourg de Bethune","cp":59000,"loyer_appart":15.24,"loyer_maison":10.95}]},{"ville":"Strasbourg","cp":67000,"avg_appart":15.52,"avg_maison":15.14,"quartiers":[{"nom":"Mairie","cp":67000,"loyer_appart":16.93,"loyer_maison":15.99},{"nom":"Orangerie","cp":67000,"loyer_appart":17.75,"loyer_maison":17.12},{"nom":"Contades","cp":67000,"loyer_appart":17.5,"loyer_maison":16.91},{"nom":"Petite France","cp":67000,"loyer_appart":16.69,"loyer_maison":15.13},{"nom":"Foret Noire","cp":67000,"loyer_appart":16.68,"loyer_maison":16.72},{"nom":"Krutenau","cp":67000,"loyer_appart":16.38,"loyer_maison":null},{"nom":"Kable","cp":67000,"loyer_appart":16.4,"loyer_maison":14.73},{"nom":"Poincare","cp":67000,"loyer_appart":16.18,"loyer_maison":14.73},{"nom":"Robertsau","cp":67000,"loyer_appart":16.99,"loyer_maison":16.42},{"nom":"Gare","cp":67000,"loyer_appart":15.51,"loyer_maison":15.76},{"nom":"Neudorf Ouest","cp":67000,"loyer_appart":15.34,"loyer_maison":15.64},{"nom":"Vauban","cp":67000,"loyer_appart":15.84,"loyer_maison":15.43},{"nom":"Esplanade","cp":67000,"loyer_appart":15.57,"loyer_maison":15.9},{"nom":"Cite de l'Ill","cp":67000,"loyer_appart":15.84,"loyer_maison":15.09},{"nom":"Neudorf Sud","cp":67000,"loyer_appart":15.01,"loyer_maison":15.21},{"nom":"Neudorf Est","cp":67000,"loyer_appart":15.02,"loyer_maison":15.62},{"nom":"Plaine des Bouchers","cp":67000,"loyer_appart":14.8,"loyer_maison":15.76},{"nom":"Cronenbourg Est","cp":67000,"loyer_appart":13.98,"loyer_maison":14.0},{"nom":"Canardiere Ouest","cp":67000,"loyer_appart":14.4,"loyer_maison":14.9},{"nom":"Port du Rhin","cp":67000,"loyer_appart":15.41,"loyer_maison":15.16},{"nom":"Canardiere Est","cp":67000,"loyer_appart":15.06,"loyer_maison":14.64},{"nom":"Stockfeld","cp":67000,"loyer_appart":14.76,"loyer_maison":14.29},{"nom":"Koenigshoffen Est","cp":67000,"loyer_appart":14.22,"loyer_maison":14.29},{"nom":"Polygone","cp":67000,"loyer_appart":15.06,"loyer_maison":15.16},{"nom":"Neuhof","cp":67000,"loyer_appart":15.13,"loyer_maison":14.33},{"nom":"Cronenbourg Ouest","cp":67000,"loyer_appart":13.96,"loyer_maison":13.91},{"nom":"Montagne Verte","cp":67000,"loyer_appart":14.38,"loyer_maison":13.5},{"nom":"Koenigshoffen Ouest","cp":67000,"loyer_appart":14.27,"loyer_maison":14.51},{"nom":"Elsau","cp":67000,"loyer_appart":14.39,"loyer_maison":14.87},{"nom":"Hautepierre","cp":67000,"loyer_appart":14.23,"loyer_maison":14.65}]},{"ville":"Lyon","cp":69000,"avg_appart":17.32,"avg_maison":15.15,"quartiers":[{"nom":"Terreaux / Bat d'Argent","cp":69001,"loyer_appart":19.97,"loyer_maison":14.57},{"nom":"Grand Quartier 05","cp":69001,"loyer_appart":19.5,"loyer_maison":15.0},{"nom":"Chartreux / Saint Vincent","cp":69001,"loyer_appart":19.03,"loyer_maison":14.65},{"nom":"Grande Cote / Annonciade","cp":69001,"loyer_appart":18.67,"loyer_maison":15.12},{"nom":"Griffon / Royale","cp":69001,"loyer_appart":18.22,"loyer_maison":14.85},{"nom":"Bellecour / Hotel Dieu","cp":69002,"loyer_appart":20.1,"loyer_maison":14.59},{"nom":"Cordeliers / Jacobins","cp":69002,"loyer_appart":20.01,"loyer_maison":14.56},{"nom":"Grand Quartier 03","cp":69002,"loyer_appart":20.4,"loyer_maison":14.59},{"nom":"Carnot / Gailleton","cp":69002,"loyer_appart":19.58,"loyer_maison":14.53},{"nom":"Perrache / Charlemagne","cp":69002,"loyer_appart":16.98,"loyer_maison":15.2},{"nom":"Grand Quartier 01","cp":69003,"loyer_appart":18.54,"loyer_maison":14.6},{"nom":"Richard Vitton / Chambovet","cp":69003,"loyer_appart":17.28,"loyer_maison":15.24},{"nom":"Voltaire / Saint Amour","cp":69003,"loyer_appart":16.93,"loyer_maison":15.15},{"nom":"Part Dieu / Bir Akeim","cp":69003,"loyer_appart":16.99,"loyer_maison":14.86},{"nom":"Genas / Monchat","cp":69003,"loyer_appart":17.5,"loyer_maison":14.88},{"nom":"Grand Quartier 06","cp":69003,"loyer_appart":17.32,"loyer_maison":14.4},{"nom":"Feuillat / Desgenettes","cp":69003,"loyer_appart":17.51,"loyer_maison":14.55},{"nom":"Villette / Maisons Neuves","cp":69003,"loyer_appart":17.09,"loyer_maison":14.55},{"nom":"Villette / Gare","cp":69003,"loyer_appart":17.02,"loyer_maison":14.95},{"nom":"Hopital / Place Croix Rousse","cp":69004,"loyer_appart":18.47,"loyer_maison":14.99},{"nom":"Henon / Mairie","cp":69004,"loyer_appart":18.52,"loyer_maison":14.77},{"nom":"Boucle / Gros Caillou","cp":69004,"loyer_appart":17.46,"loyer_maison":14.86},{"nom":"Grand Quartier 04","cp":69004,"loyer_appart":17.51,"loyer_maison":14.77},{"nom":"Ypres / Serein","cp":69004,"loyer_appart":17.68,"loyer_maison":14.83},{"nom":"Vieux Lyon / Quarantaine","cp":69005,"loyer_appart":19.49,"loyer_maison":14.86},{"nom":"La Sarra / Saint Just","cp":69005,"loyer_appart":17.05,"loyer_maison":15.02},{"nom":"Menival la Plaine","cp":69005,"loyer_appart":16.5,"loyer_maison":16.6},{"nom":"Point du Jour / Acqueducs","cp":69005,"loyer_appart":16.37,"loyer_maison":15.67},{"nom":"Provinces / Chavril","cp":69005,"loyer_appart":15.7,"loyer_maison":15.75},{"nom":"Champvert / Mairie","cp":69005,"loyer_appart":15.97,"loyer_maison":15.29},{"nom":"Le Parc / L'Helvetie","cp":69006,"loyer_appart":19.03,"loyer_maison":14.59},{"nom":"Puvis de Chavannes / Le Lycee","cp":69006,"loyer_appart":19.15,"loyer_maison":14.59},{"nom":"Moliere / Edgard Quinet","cp":69006,"loyer_appart":19.62,"loyer_maison":14.59},{"nom":"Marechal Lyautey / Vitton","cp":69006,"loyer_appart":18.78,"loyer_maison":14.6},{"nom":"Jules Ferry / Recamier","cp":69006,"loyer_appart":18.37,"loyer_maison":14.81},{"nom":"Moliere / Vauban","cp":69006,"loyer_appart":18.4,"loyer_maison":14.82},{"nom":"Charmettes / Bellecombe","cp":69006,"loyer_appart":17.51,"loyer_maison":15.09},{"nom":"Saint Michel / Mairie","cp":69007,"loyer_appart":16.72,"loyer_maison":15.16},{"nom":"Grand Quartier 01","cp":69007,"loyer_appart":16.8,"loyer_maison":15.18},{"nom":"Victor Bach / Saint Louis","cp":69007,"loyer_appart":16.56,"loyer_maison":15.01},{"nom":"Stalingrad / Lamothe","cp":69007,"loyer_appart":16.83,"loyer_maison":14.93},{"nom":"Yves Farges / Le Fleuve","cp":69007,"loyer_appart":16.96,"loyer_maison":14.95},{"nom":"Grand Quartier 04","cp":69007,"loyer_appart":16.75,"loyer_maison":15.28},{"nom":"Grand Quartier 07","cp":69007,"loyer_appart":16.64,"loyer_maison":15.04},{"nom":"Grand Quartier 08","cp":69007,"loyer_appart":16.69,"loyer_maison":15.28},{"nom":"Monplaisir / Bachut","cp":69008,"loyer_appart":16.95,"loyer_maison":14.58},{"nom":"Jean Moulin / Marius Berliet","cp":69008,"loyer_appart":16.55,"loyer_maison":14.7},{"nom":"La Buire / Bataille","cp":69008,"loyer_appart":16.18,"loyer_maison":14.93},{"nom":"Etat Unis / Le Bocage","cp":69008,"loyer_appart":15.97,"loyer_maison":15.0},{"nom":"Mairie / Mermoz","cp":69008,"loyer_appart":15.88,"loyer_maison":15.16},{"nom":"Grand Trou / St Jean de Dieu","cp":69008,"loyer_appart":15.82,"loyer_maison":15.13},{"nom":"Audibert / Moulin à Vent","cp":69008,"loyer_appart":15.56,"loyer_maison":15.24},{"nom":"Santy / La Plaine","cp":69008,"loyer_appart":15.94,"loyer_maison":15.15},{"nom":"Grange Rouge / Viviani","cp":69008,"loyer_appart":15.73,"loyer_maison":15.4},{"nom":"Salengro / Marietton","cp":69009,"loyer_appart":15.58,"loyer_maison":15.45},{"nom":"Gorge de Loup / L'Observance","cp":69009,"loyer_appart":15.47,"loyer_maison":15.17},{"nom":"Le Bourg / Gare de Vaise","cp":69009,"loyer_appart":16.0,"loyer_maison":14.89},{"nom":"Grand Champ / Jean Perrin","cp":69009,"loyer_appart":16.43,"loyer_maison":14.69},{"nom":"Champvert / La Graviere","cp":69009,"loyer_appart":16.18,"loyer_maison":15.43},{"nom":"La Duchere","cp":69009,"loyer_appart":16.24,"loyer_maison":15.47}]},{"ville":"Paris","cp":75000,"avg_appart":33.14,"avg_maison":29.24,"quartiers":[{"nom":"Place Vendome","cp":75001,"loyer_appart":38.35,"loyer_maison":null},{"nom":"Saint Germain l'Auxerrois","cp":75001,"loyer_appart":37.11,"loyer_maison":null},{"nom":"Palais Royal","cp":75001,"loyer_appart":38.57,"loyer_maison":null},{"nom":"Les Halles","cp":75001,"loyer_appart":37.15,"loyer_maison":null},{"nom":"Gaillon","cp":75002,"loyer_appart":37.52,"loyer_maison":null},{"nom":"Vivienne","cp":75002,"loyer_appart":37.19,"loyer_maison":null},{"nom":"Mail","cp":75002,"loyer_appart":37.32,"loyer_maison":null},{"nom":"Bonne Nouvelle","cp":75002,"loyer_appart":37.35,"loyer_maison":null},{"nom":"Les Archives","cp":75003,"loyer_appart":37.01,"loyer_maison":null},{"nom":"Enfants Rouges","cp":75003,"loyer_appart":35.98,"loyer_maison":null},{"nom":"Sainte Avoye","cp":75003,"loyer_appart":37.65,"loyer_maison":null},{"nom":"Arts et Metiers","cp":75003,"loyer_appart":38.0,"loyer_maison":null},{"nom":"Notre Dame","cp":75004,"loyer_appart":37.14,"loyer_maison":null},{"nom":"Saint Gervais","cp":75004,"loyer_appart":37.57,"loyer_maison":null},{"nom":"Arsenal","cp":75004,"loyer_appart":37.01,"loyer_maison":null},{"nom":"Saint Merri","cp":75004,"loyer_appart":37.1,"loyer_maison":null},{"nom":"Sorbonne","cp":75005,"loyer_appart":36.84,"loyer_maison":null},{"nom":"Saint Victor","cp":75005,"loyer_appart":36.21,"loyer_maison":null},{"nom":"Val de Grace","cp":75005,"loyer_appart":36.12,"loyer_maison":null},{"nom":"Jardin des Plantes","cp":75005,"loyer_appart":35.12,"loyer_maison":null},{"nom":"Saint Germain des Pres","cp":75006,"loyer_appart":39.28,"loyer_maison":null},{"nom":"Odeon","cp":75006,"loyer_appart":37.76,"loyer_maison":null},{"nom":"Monnaie","cp":75006,"loyer_appart":38.87,"loyer_maison":null},{"nom":"Notre Dame des Champs","cp":75006,"loyer_appart":39.06,"loyer_maison":null},{"nom":"Saint Thomas d'Aquin","cp":75007,"loyer_appart":39.88,"loyer_maison":null},{"nom":"Invalides","cp":75007,"loyer_appart":38.45,"loyer_maison":null},{"nom":"Ecole Militaire","cp":75007,"loyer_appart":39.27,"loyer_maison":null},{"nom":"Gros Caillou","cp":75007,"loyer_appart":36.26,"loyer_maison":null},{"nom":"Champs Elysees","cp":75008,"loyer_appart":36.17,"loyer_maison":null},{"nom":"Madeleine","cp":75008,"loyer_appart":37.21,"loyer_maison":null},{"nom":"Faubourg du Roule","cp":75008,"loyer_appart":36.91,"loyer_maison":null},{"nom":"Europe","cp":75008,"loyer_appart":35.96,"loyer_maison":null},{"nom":"Chaussee d'Antin","cp":75009,"loyer_appart":36.48,"loyer_maison":null},{"nom":"Saint Georges","cp":75009,"loyer_appart":35.01,"loyer_maison":null},{"nom":"Rochechouart","cp":75009,"loyer_appart":34.83,"loyer_maison":null},{"nom":"Faubourg Montmartre","cp":75009,"loyer_appart":35.15,"loyer_maison":null},{"nom":"Porte Saint Martin","cp":75010,"loyer_appart":34.4,"loyer_maison":null},{"nom":"Porte Saint Denis","cp":75010,"loyer_appart":34.59,"loyer_maison":null},{"nom":"Hopital Saint Louis","cp":75010,"loyer_appart":32.89,"loyer_maison":null},{"nom":"Saint Vincent de Paul","cp":75010,"loyer_appart":32.82,"loyer_maison":null},{"nom":"Saint Ambroise","cp":75011,"loyer_appart":33.98,"loyer_maison":null},{"nom":"Roquette","cp":75011,"loyer_appart":33.51,"loyer_maison":null},{"nom":"Folie Mericourt","cp":75011,"loyer_appart":34.49,"loyer_maison":null},{"nom":"Sainte Marguerite","cp":75011,"loyer_appart":33.09,"loyer_maison":null},{"nom":"Quinze Vingts","cp":75012,"loyer_appart":32.69,"loyer_maison":null},{"nom":"Picpus","cp":75012,"loyer_appart":31.12,"loyer_maison":null},{"nom":"Bercy","cp":75012,"loyer_appart":30.17,"loyer_maison":null},{"nom":"Bel Air","cp":75012,"loyer_appart":30.87,"loyer_maison":null},{"nom":"Croulebarbe","cp":75013,"loyer_appart":33.07,"loyer_maison":null},{"nom":"Salpetriere","cp":75013,"loyer_appart":32.43,"loyer_maison":null},{"nom":"Maison Blanche","cp":75013,"loyer_appart":30.25,"loyer_maison":null},{"nom":"Gare","cp":75013,"loyer_appart":29.87,"loyer_maison":null},{"nom":"Montparnasse","cp":75014,"loyer_appart":35.16,"loyer_maison":null},{"nom":"Petit Montrouge","cp":75014,"loyer_appart":33.0,"loyer_maison":null},{"nom":"Plaisance","cp":75014,"loyer_appart":32.23,"loyer_maison":null},{"nom":"Parc de Montsouris","cp":75014,"loyer_appart":31.83,"loyer_maison":null},{"nom":"Grenelle","cp":75015,"loyer_appart":33.26,"loyer_maison":null},{"nom":"Necker","cp":75015,"loyer_appart":34.71,"loyer_maison":null},{"nom":"Javel","cp":75015,"loyer_appart":32.29,"loyer_maison":null},{"nom":"Saint Lambert","cp":75015,"loyer_appart":31.65,"loyer_maison":null},{"nom":"Chaillot","cp":75016,"loyer_appart":35.78,"loyer_maison":null},{"nom":"Porte Dauphine","cp":75016,"loyer_appart":38.81,"loyer_maison":null},{"nom":"Muette","cp":75016,"loyer_appart":35.8,"loyer_maison":null},{"nom":"Auteuil","cp":75016,"loyer_appart":33.91,"loyer_maison":null},{"nom":"Plaine Monceau","cp":75017,"loyer_appart":34.84,"loyer_maison":null},{"nom":"Ternes","cp":75017,"loyer_appart":35.17,"loyer_maison":null},{"nom":"Batignolles","cp":75017,"loyer_appart":33.62,"loyer_maison":null},{"nom":"Epinettes","cp":75017,"loyer_appart":32.69,"loyer_maison":null},{"nom":"Grandes Carrieres","cp":75018,"loyer_appart":31.47,"loyer_maison":null},{"nom":"Clignancourt","cp":75018,"loyer_appart":31.77,"loyer_maison":null},{"nom":"Goutte d'Or","cp":75018,"loyer_appart":29.85,"loyer_maison":null},{"nom":"Chapelle","cp":75018,"loyer_appart":28.55,"loyer_maison":null},{"nom":"Combat","cp":75019,"loyer_appart":30.84,"loyer_maison":null},{"nom":"Amerique","cp":75019,"loyer_appart":29.06,"loyer_maison":null},{"nom":"Villette","cp":75019,"loyer_appart":28.63,"loyer_maison":null},{"nom":"Pont de Flandre","cp":75019,"loyer_appart":27.36,"loyer_maison":null},{"nom":"Pere Lachaise","cp":75020,"loyer_appart":31.4,"loyer_maison":null},{"nom":"Belleville","cp":75020,"loyer_appart":30.98,"loyer_maison":null},{"nom":"Charonne","cp":75020,"loyer_appart":29.53,"loyer_maison":null},{"nom":"Saint Fargeau","cp":75020,"loyer_appart":29.24,"loyer_maison":null}]},{"ville":"Neuilly-sur-Seine","cp":92200,"avg_appart":33.82,"avg_maison":31.66,"quartiers":[{"nom":"Charles Laffitte","cp":92200,"loyer_appart":34.65,"loyer_maison":null},{"nom":"Saint James Madrid","cp":92200,"loyer_appart":34.61,"loyer_maison":null},{"nom":"Parc de Neuilly","cp":92200,"loyer_appart":33.91,"loyer_maison":null},{"nom":"Plaine des Sablons","cp":92200,"loyer_appart":33.21,"loyer_maison":null}]},{"ville":"Vincennes","cp":94300,"avg_appart":28.85,"avg_maison":27.45,"quartiers":[{"nom":"Centre Sud","cp":94300,"loyer_appart":31.16,"loyer_maison":null},{"nom":"Centre Nord","cp":94300,"loyer_appart":29.78,"loyer_maison":null},{"nom":"Ouest","cp":94300,"loyer_appart":28.53,"loyer_maison":null},{"nom":"Est","cp":94300,"loyer_appart":27.5,"loyer_maison":null}]},{"ville":"Pantin","cp":93500,"avg_appart":23.21,"avg_maison":28.57,"quartiers":[{"nom":"Ourcq / Hoche","cp":93500,"loyer_appart":23.61,"loyer_maison":null},{"nom":"Mairie / Porte de Pantin","cp":93500,"loyer_appart":23.15,"loyer_maison":null},{"nom":"Eglise / Pommiers","cp":93500,"loyer_appart":24.82,"loyer_maison":null},{"nom":"Verpantin / Sept Arpents","cp":93500,"loyer_appart":24.14,"loyer_maison":null},{"nom":"Limites","cp":93500,"loyer_appart":24.9,"loyer_maison":null},{"nom":"Courtillieres","cp":93500,"loyer_appart":19.18,"loyer_maison":null},{"nom":"Quatre Chemins Nord","cp":93500,"loyer_appart":20.47,"loyer_maison":null},{"nom":"Quatre Chemins Sud","cp":93500,"loyer_appart":21.68,"loyer_maison":null}]},{"ville":"Rueil-Malmaison","cp":92500,"avg_appart":23.87,"avg_maison":30.01,"quartiers":[]},{"ville":"Colombes","cp":92700,"avg_appart":23.04,"avg_maison":29.54,"quartiers":[]},{"ville":"Versailles","cp":78000,"avg_appart":21.19,"avg_maison":24.08,"quartiers":[]},{"ville":"Saint-Maur-des-Fossés","cp":94100,"avg_appart":21.5,"avg_maison":25.33,"quartiers":[]},{"ville":"Annecy","cp":74000,"avg_appart":18.46,"avg_maison":22.22,"quartiers":[]},{"ville":"Meudon","cp":92190,"avg_appart":22.47,"avg_maison":32.15,"quartiers":[]},{"ville":"Sceaux","cp":92330,"avg_appart":22.68,"avg_maison":26.74,"quartiers":[]},{"ville":"Chaville","cp":92370,"avg_appart":22.26,"avg_maison":29.69,"quartiers":[]},{"ville":"Torcy","cp":77200,"avg_appart":18.26,"avg_maison":18.95,"quartiers":[]},{"ville":"Poissy","cp":78300,"avg_appart":18.97,"avg_maison":21.22,"quartiers":[]},{"ville":"Ermont","cp":95120,"avg_appart":19.72,"avg_maison":21.5,"quartiers":[]},{"ville":"Pontoise","cp":95300,"avg_appart":18.15,"avg_maison":21.08,"quartiers":[]},{"ville":"Limoges","cp":87000,"avg_appart":11.62,"avg_maison":10.57,"quartiers":[]},{"ville":"Nancy","cp":54000,"avg_appart":14.01,"avg_maison":14.91,"quartiers":[]}];
+
+
+// Sort cities alphabetically
+DATA.sort((a,b) => a.ville.localeCompare(b.ville, 'fr'));
+
+const selVille = document.getElementById('select-ville');
+const hiddenQuartier = document.getElementById('select-quartier');
+const searchInput = document.getElementById('input-quartier-search');
+const dropdown = document.getElementById('autocomplete-dropdown');
+const btnSim = document.getElementById('btn-simulate');
+
+let currentItems = []; // {value, label, group}
+let selectedValue = '';
+
+// Populate city dropdown
+DATA.forEach(city => {
+  const opt = document.createElement('option');
+  opt.value = city.ville;
+  opt.textContent = city.ville;
+  selVille.appendChild(opt);
+});
+
+function getGroupLabel(cp, ville) {
+  // Paris: group by arrondissement (75001 → "1er arrondissement")
+  if (cp >= 75001 && cp <= 75020) {
+    const arr = cp - 75000;
+    return arr === 1 ? `${arr}er arrondissement` : `${arr}e arrondissement`;
+  }
+  // Marseille: group by arrondissement (13001 → "1er arr.")
+  if (cp >= 13001 && cp <= 13016) {
+    const arr = cp - 13000;
+    return arr === 1 ? `${arr}er arrondissement` : `${arr}e arrondissement`;
+  }
+  // Lyon: group by arrondissement (69001-69009)
+  if (cp >= 69001 && cp <= 69009) {
+    const arr = cp - 69000;
+    return arr === 1 ? `${arr}er arrondissement` : `${arr}e arrondissement`;
+  }
+  return null; // no grouping
+}
+
+function buildItems(cityData, typeField) {
+  const field = typeField === 'appart' ? 'loyer_appart' : 'loyer_maison';
+  const items = [];
+
+  // City-wide average always first
+  items.push({ value: '__ville__', label: `${cityData.ville} — moyenne toute la ville`, group: null });
+
+  // Group quartiers by CP
+  const groups = {};
+  cityData.quartiers.forEach(q => {
+    if (q[field] === null) return;
+    const g = getGroupLabel(q.cp, cityData.ville) || 'Quartiers';
+    if (!groups[g]) groups[g] = [];
+    groups[g].push({ value: q.nom, label: q.nom, group: g });
+  });
+
+  Object.entries(groups).forEach(([gName, gItems]) => {
+    gItems.forEach(item => items.push(item));
+  });
+
+  return items;
+}
+
+function renderDropdown(items, query) {
+  dropdown.innerHTML = '';
+  const q = query.toLowerCase().trim();
+
+  let lastGroup = null;
+  let count = 0;
+
+  items.forEach(item => {
+    const match = !q || item.label.toLowerCase().includes(q);
+    if (!match) return;
+    count++;
+
+    if (item.group && item.group !== lastGroup) {
+      const header = document.createElement('div');
+      header.className = 'ac-group-header';
+      header.textContent = item.group;
+      dropdown.appendChild(header);
+      lastGroup = item.group;
+    }
+
+    const div = document.createElement('div');
+    div.className = 'ac-item' + (item.value === selectedValue ? ' selected' : '');
+
+    if (q) {
+      const idx = item.label.toLowerCase().indexOf(q);
+      if (idx >= 0) {
+        div.innerHTML = item.label.slice(0, idx) +
+          '<mark>' + item.label.slice(idx, idx + q.length) + '</mark>' +
+          item.label.slice(idx + q.length);
+      } else {
+        div.textContent = item.label;
+      }
+    } else {
+      div.textContent = item.label;
+    }
+
+    div.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      selectItem(item);
+    });
+    dropdown.appendChild(div);
+  });
+
+  dropdown.classList.toggle('open', count > 0);
+}
+
+function selectItem(item) {
+  selectedValue = item.value;
+  hiddenQuartier.value = item.value;
+  searchInput.value = item.label;
+  dropdown.classList.remove('open');
+  checkReady();
+}
+
+function resetQuartier() {
+  selectedValue = '';
+  hiddenQuartier.value = '';
+  searchInput.value = '';
+  dropdown.classList.remove('open');
+  checkReady();
+}
+
+selVille.addEventListener('change', () => {
+  const ville = selVille.value;
+  resetQuartier();
+  if (!ville) {
+    searchInput.disabled = true;
+    searchInput.placeholder = '— Sélectionnez d\'abord une ville —';
+    currentItems = [];
+    return;
+  }
+  const cityData = DATA.find(c => c.ville === ville);
+  const typeField = document.querySelector('input[name="type-bien"]:checked').value;
+  currentItems = buildItems(cityData, typeField);
+  searchInput.disabled = false;
+  searchInput.placeholder = 'Tapez pour filtrer ou parcourez la liste…';
+});
+
+searchInput.addEventListener('focus', () => {
+  if (currentItems.length) renderDropdown(currentItems, searchInput.value);
+});
+
+searchInput.addEventListener('input', () => {
+  selectedValue = '';
+  hiddenQuartier.value = '';
+  renderDropdown(currentItems, searchInput.value);
+  checkReady();
+});
+
+searchInput.addEventListener('blur', () => {
+  setTimeout(() => dropdown.classList.remove('open'), 150);
+});
+
+document.querySelectorAll('input[name="type-bien"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    const ville = selVille.value;
+    if (ville) {
+      const cityData = DATA.find(c => c.ville === ville);
+      const typeField = document.querySelector('input[name="type-bien"]:checked').value;
+      currentItems = buildItems(cityData, typeField);
+      // Reset quartier if it no longer has data
+      if (selectedValue && selectedValue !== '__ville__') {
+        const field = typeField === 'appart' ? 'loyer_appart' : 'loyer_maison';
+        const q = cityData.quartiers.find(x => x.nom === selectedValue);
+        if (!q || q[field] === null) resetQuartier();
+      }
+    }
+    checkReady();
+  });
+});
+
+document.getElementById('input-loyer').addEventListener('input', checkReady);
+document.getElementById('input-surface').addEventListener('input', checkReady);
+
+function checkReady() {
+  const loyer = parseFloat(document.getElementById('input-loyer').value);
+  const surface = parseFloat(document.getElementById('input-surface').value);
+  const ville = selVille.value;
+  const quartier = hiddenQuartier.value;
+  btnSim.disabled = !(ville && quartier && loyer > 0 && surface > 0);
+}
+
+function simulate() {
+  const ville = selVille.value;
+  const quartierNom = hiddenQuartier.value;
+  const loyer = parseFloat(document.getElementById('input-loyer').value);
+  const surface = parseFloat(document.getElementById('input-surface').value);
+  const type = document.querySelector('input[name="type-bien"]:checked').value;
+
+  const loyerM2 = loyer / surface;
+  const cityData = DATA.find(c => c.ville === ville);
+  const field = type === 'appart' ? 'loyer_appart' : 'loyer_maison';
+
+  let reference, referenceLabel;
+  if (quartierNom === '__ville__') {
+    reference = type === 'appart' ? cityData.avg_appart : cityData.avg_maison;
+    referenceLabel = `moyenne de ${ville}`;
+  } else {
+    const q = cityData.quartiers.find(x => x.nom === quartierNom);
+    reference = q ? q[field] : null;
+    referenceLabel = `moyenne du quartier ${quartierNom}`;
+  }
+
+  if (!reference) { showNoData(); return; }
+
+  const diff = loyerM2 - reference;
+  const diffPct = (diff / reference) * 100;
+  const threshold = 5;
+
+  let status, icon, verdictText, detailText;
+  if (diffPct > threshold) {
+    status = 'above'; icon = '⚠️';
+    verdictText = 'Vous payez plus cher que la moyenne';
+    detailText = `Votre loyer est <strong>${diffPct > 0 ? '+' : ''}${diffPct.toFixed(1)}%</strong> au-dessus de la ${referenceLabel} (${reference.toFixed(2)} €/m²).`;
+  } else if (diffPct < -threshold) {
+    status = 'below'; icon = '✅';
+    verdictText = 'Vous êtes en dessous du marché';
+    detailText = `Votre loyer est <strong>${diffPct.toFixed(1)}%</strong> en dessous de la ${referenceLabel} (${reference.toFixed(2)} €/m²). Bonne affaire.`;
+  } else {
+    status = 'equal'; icon = '🎯';
+    verdictText = 'Vous êtes dans la moyenne';
+    detailText = `Votre loyer correspond à la ${referenceLabel} (${reference.toFixed(2)} €/m²).`;
+  }
+
+  const min = Math.min(loyerM2, reference) * 0.7;
+  const max = Math.max(loyerM2, reference) * 1.15;
+  const range = max - min;
+  const userPct = Math.min(95, Math.max(5, ((loyerM2 - min) / range) * 100));
+  const refPct = Math.min(95, Math.max(5, ((reference - min) / range) * 100));
+
+  const resultCard = document.getElementById('result-card');
+  resultCard.style.display = 'block';
+  resultCard.innerHTML = `
+    <div class="result-banner ${status}">
+      <div class="result-icon">${icon}</div>
+      <div>
+        <div class="result-verdict ${status}">${verdictText}</div>
+        <div class="result-detail">${detailText}</div>
+      </div>
+    </div>
+    <div class="result-stats">
+      <div class="stat-item highlight">
+        <span class="stat-value">${loyerM2.toFixed(2)} €</span>
+        <span class="stat-label">Votre loyer/m²</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">${reference.toFixed(2)} €</span>
+        <span class="stat-label">Moyenne marché</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" style="color:${status==='above'?'var(--challenges-red)':status==='below'?'var(--green)':'#d4a00a'}">${diff > 0 ? '+' : ''}${diff.toFixed(2)} €</span>
+        <span class="stat-label">Écart /m²</span>
+      </div>
+    </div>
+    <div class="result-bar-section">
+      <div class="bar-title">Positionnement de votre loyer</div>
+      <div class="bar-container">
+        <div class="bar-track"></div>
+        <div class="bar-fill ${status}" style="width: ${Math.max(userPct, refPct)}%"></div>
+        <div class="bar-marker" style="left: ${refPct}%">
+          <div class="bar-marker-label">Référence</div>
+          <div class="bar-marker-line"></div>
+        </div>
+        <div class="bar-marker" style="left: ${userPct}%">
+          <div class="bar-marker-label" style="color:${status==='above'?'var(--challenges-red)':status==='below'?'var(--green)':'#d4a00a'}">Vous</div>
+          <div class="bar-marker-line" style="opacity:0.8;background:${status==='above'?'var(--challenges-red)':status==='below'?'var(--green)':'#d4a00a'}"></div>
+        </div>
+      </div>
+      <div class="bar-labels">
+        <span>${min.toFixed(1)} €/m²</span>
+        <span>${max.toFixed(1)} €/m²</span>
+      </div>
+    </div>
+    <div class="source-note">Source : SeLoger / Meilleurs Agents. Loyers médians au m², charges non comprises. Données indicatives.</div>
+  `;
+  resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function showNoData() {
+  const resultCard = document.getElementById('result-card');
+  resultCard.style.display = 'block';
+  resultCard.innerHTML = `<div class="no-data-msg">Données insuffisantes pour ce quartier et ce type de bien.</div>`;
+}
+</script>
+
+</body>
+</html>
